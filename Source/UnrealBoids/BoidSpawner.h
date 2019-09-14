@@ -7,6 +7,9 @@
 #include "Components/StaticMeshComponent.h"
 #include "BoidSpawner.generated.h"
 
+/**
+ * Contains all bounds of spawner.
+ */
 USTRUCT()
 struct UNREALBOIDS_API FSpawnerBounds
 {
@@ -25,6 +28,29 @@ public:
 		BottomBound = bottomBound;
 	}
 	virtual ~FSpawnerBounds() = default;
+
+	/**
+	 * Add all bounds to array and return it.
+	 *
+	 * @return array with all bounds.
+	 */
+	TArray<UStaticMeshComponent*> ToArray() const
+	{
+		TArray<UStaticMeshComponent*> meshes = TArray<UStaticMeshComponent*>();
+		if (LeftBound)
+			meshes.Add(LeftBound);
+		if (RightBound)
+			meshes.Add(RightBound);
+		if (BackBound)
+			meshes.Add(BackBound);
+		if (FrontBound)
+			meshes.Add(FrontBound);
+		if (TopBound)
+			meshes.Add(TopBound);
+		if (BottomBound)
+			meshes.Add(BottomBound);
+		return meshes;
+	}
 
 	UPROPERTY()
 		UStaticMeshComponent* LeftBound;
@@ -56,6 +82,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void Tick(float DeltaSeconds) override;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid spawner properties")
@@ -71,8 +98,48 @@ public:
 		float BoidAreaDepth;
 
 private:
+	UPROPERTY()
+		FSpawnerBounds bounds;
+
+	/// Create boid inside spawner area.
 	void SpawnBoid() const;
+
+	/**
+	 * Get all bounds of spawner and put them in struct.
+	 *
+	 * @return struct containing all bounds of spawner
+	 */
 	FSpawnerBounds GetSpawnerBounds() const;
-	void UpdateBounds(FSpawnerBounds bounds) const;
-	void UpdateBound(UStaticMeshComponent* bound, FVector location, FVector scale) const;
+
+	/**
+	 * Update location and scale of all bounds based on exposed properties.
+	 *
+	 * @param bounds Struct containing all bounds of spawner.
+	 */
+	void UpdateBoundTransforms(FSpawnerBounds bounds) const;
+
+	/**
+	 * Update bound location and scale.
+	 *
+	 * @param bound Reference to bound that will be updated.
+	 * @param location New relative location of bound.
+	 * @param scale New relative scale of bound.
+	 */
+	static void SetBoundTransform(UStaticMeshComponent* bound, FVector location, FVector scale);
+
+	/**
+	 * Find main camera and set visibility of all spawner bounds relative to that camera.
+	 *
+	 * Only inside bounds considered visible.
+	 */
+	void UpdateBoundVisibility();
+
+	/**
+	 * Send linecast from bound to camera and check overlap.
+	 *
+	 * @param bound Bound from which location linecast is sent.
+	 * @param camera Main camera actor to which location linecast is sent.
+	 * @return true if linecast hit other bound.
+	 */
+	bool IsBoundVisible(UStaticMeshComponent* bound, AActor* camera);
 };

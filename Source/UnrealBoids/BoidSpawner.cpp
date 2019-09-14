@@ -5,6 +5,8 @@
 #include "Engine/World.h"
 #include "BoidPawn.h"
 #include "Engine/Engine.h"
+#include "GameFramework/PlayerController.h"
+
 
 // Sets default values
 ABoidSpawner::ABoidSpawner()
@@ -17,8 +19,13 @@ void ABoidSpawner::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	const FSpawnerBounds bounds = GetSpawnerBounds();
-	UpdateBounds(bounds);
+	bounds = GetSpawnerBounds();
+	UpdateBoundTransforms(bounds);
+}
+
+void ABoidSpawner::Tick(float DeltaSeconds)
+{
+	UpdateBoundVisibility();
 }
 
 // Called when the game starts or when spawned
@@ -38,15 +45,13 @@ void ABoidSpawner::SpawnBoid() const
 {
 	FActorSpawnParameters parameters;
 	parameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	const FVector locationOffset = FVector(FMath::RandRange(-BoidAreaDepth / 2, BoidAreaDepth / 2),
+		FMath::RandRange(-BoidAreaWidth / 2, BoidAreaWidth / 2),
+		FMath::RandRange(-BoidAreaHeight / 2, BoidAreaHeight / 2));
 	const FVector direction = FMath::VRand();
-	GetWorld()->SpawnActor<ABoidPawn>(BoidBlueprintType.Get(), GetActorLocation(), direction.Rotation(), parameters);
+	GetWorld()->SpawnActor<ABoidPawn>(BoidBlueprintType.Get(), GetActorLocation() + locationOffset, direction.Rotation(), parameters);
 }
 
-/**
- * Get all bounds of spawner and put them in struct.
- *
- * @return struct containing all bounds of spawner
- */
 FSpawnerBounds ABoidSpawner::GetSpawnerBounds() const
 {
 	TArray<UActorComponent*> components = GetComponentsByClass(UStaticMeshComponent::StaticClass());
@@ -60,40 +65,50 @@ FSpawnerBounds ABoidSpawner::GetSpawnerBounds() const
 		nameToMesh.FindRef("FrontBound"), nameToMesh.FindRef("TopBound"), nameToMesh.FindRef("BottomBound"));
 }
 
-/**
- * Update location and scale of all bounds based on exposed properties.
- *
- * @param bounds Struct containing all bounds of spawner.
- */
-void ABoidSpawner::UpdateBounds(FSpawnerBounds bounds) const
+void ABoidSpawner::UpdateBoundTransforms(FSpawnerBounds bounds) const
 {
 	const FVector yLocation = FVector(0, -BoidAreaWidth / 2, 0);
 	const FVector yScale = FVector(BoidAreaDepth / 100, 1, BoidAreaHeight / 100);
-	UpdateBound(bounds.LeftBound, yLocation, yScale);
-	UpdateBound(bounds.RightBound, -yLocation, yScale);
+	SetBoundTransform(bounds.LeftBound, yLocation, yScale);
+	SetBoundTransform(bounds.RightBound, -yLocation, yScale);
 
 	const FVector xLocation = FVector(BoidAreaDepth / 2, 0, 0);
 	const FVector xScale = FVector(1, BoidAreaWidth / 100, BoidAreaHeight / 100);
-	UpdateBound(bounds.FrontBound, xLocation, xScale);
-	UpdateBound(bounds.BackBound, -xLocation, xScale);
+	SetBoundTransform(bounds.FrontBound, xLocation, xScale);
+	SetBoundTransform(bounds.BackBound, -xLocation, xScale);
 
 	const FVector zLocation = FVector(0, 0, BoidAreaHeight / 2);
 	const FVector zScale = FVector(BoidAreaDepth / 100, BoidAreaWidth / 100, 1);
-	UpdateBound(bounds.TopBound, zLocation, zScale);
-	UpdateBound(bounds.BottomBound, -zLocation, zScale);
+	SetBoundTransform(bounds.TopBound, zLocation, zScale);
+	SetBoundTransform(bounds.BottomBound, -zLocation, zScale);
 }
 
-/**
- * Update bound location and scale.
- *
- * @param bound Reference to bound that will be updated.
- * @param location New relative location of bound.
- * @param scale New relative scale of bound.
- */
-void ABoidSpawner::UpdateBound(UStaticMeshComponent* bound, FVector location, FVector scale) const
+void ABoidSpawner::SetBoundTransform(UStaticMeshComponent* bound, FVector location, FVector scale)
 {
 	if (!bound) return;
 	bound->SetRelativeLocation(location);
 	bound->SetRelativeScale3D(scale);
+}
+
+void ABoidSpawner::UpdateBoundVisibility()
+{
+	APlayerController* controller = GetWorld()->GetFirstPlayerController();
+	if (!controller) return;
+	AActor* camera = controller->GetViewTarget();
+	if (!camera) return;
+	for (UStaticMeshComponent* bound: bounds.ToArray())
+	{
+		bound->SetHiddenInGame(!IsBoundVisible(bound, camera));
+	}
+}
+
+bool ABoidSpawner::IsBoundVisible(UStaticMeshComponent* bound, AActor* camera)
+{
+	FHitResult hitResult;
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(camera);
+	params.AddIgnoredComponent(bound);
+	return GetWorld()->LineTraceSingleByChannel(hitResult, bound->GetComponentLocation(), camera->GetActorLocation(),
+	                                            ECC_Camera, params);
 }
 
