@@ -96,7 +96,7 @@ void ABoidSpawner::UpdateBoundVisibility()
 	if (!controller) return;
 	AActor* camera = controller->GetViewTarget();
 	if (!camera) return;
-	for (UStaticMeshComponent* bound: bounds.ToArray())
+	for (UStaticMeshComponent* bound : bounds.ToArray())
 	{
 		bound->SetHiddenInGame(!IsBoundVisible(bound, camera));
 	}
@@ -109,6 +109,6 @@ bool ABoidSpawner::IsBoundVisible(UStaticMeshComponent* bound, AActor* camera)
 	params.AddIgnoredActor(camera);
 	params.AddIgnoredComponent(bound);
 	return GetWorld()->LineTraceSingleByChannel(hitResult, bound->GetComponentLocation(), camera->GetActorLocation(),
-	                                            ECC_Camera, params);
+		ECC_Camera, params);
 }
 
