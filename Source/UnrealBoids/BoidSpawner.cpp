@@ -45,9 +45,9 @@ void ABoidSpawner::SpawnBoid() const
 {
 	FActorSpawnParameters parameters;
 	parameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	const FVector locationOffset = FVector(FMath::RandRange(-BoidAreaDepth / 2, BoidAreaDepth / 2),
-		FMath::RandRange(-BoidAreaWidth / 2, BoidAreaWidth / 2),
-		FMath::RandRange(-BoidAreaHeight / 2, BoidAreaHeight / 2));
+	const FVector locationOffset = FVector(FMath::RandRange(-BoidAreaDepth / 2 + 100, BoidAreaDepth / 2 - 100),
+		FMath::RandRange(-BoidAreaWidth / 2 + 100, BoidAreaWidth / 2 - 100),
+		FMath::RandRange(-BoidAreaHeight / 2 + 100, BoidAreaHeight / 2 - 100));
 	const FVector direction = FMath::VRand();
 	GetWorld()->SpawnActor<ABoidPawn>(BoidBlueprintType.Get(), GetActorLocation() + locationOffset, direction.Rotation(), parameters);
 }
