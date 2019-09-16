@@ -38,12 +38,12 @@ void AThirdPersonCamera::Tick(float DeltaTime)
 
 void AThirdPersonCamera::SetHorizontal(float axisValue)
 {
-	currentRotation.Yaw -= axisValue;
+	currentRotation.Yaw += axisValue;
 }
 
 void AThirdPersonCamera::SetVertical(float axisValue)
 {
-	currentRotation.Pitch += axisValue;
+	currentRotation.Pitch -= axisValue;
 }
 
 void AThirdPersonCamera::ZoomIn()

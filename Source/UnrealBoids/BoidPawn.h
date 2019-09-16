@@ -23,22 +23,33 @@ protected:
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid properties")
-		float TopSpeed = 10;
+		float MinSpeed = 5;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid properties")
+		float MaxSpeed = 10;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid properties")
 		int LinecastPointsAmount = 300;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid properties")
+		float CohesionWeight = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid properties")
+		float SeparationWeight = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid properties")
+		float AlignmentWeight = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid properties")
+		float CollisionAvoidanceWeight = 1;
+
 	/**
-	 * Return current direction of boid.
+	 * Return current velocity of boid.
 	 *
 	 * @return current velocity.
 	 */
-	FVector GetCurrentDirection() const;
+	FVector GetCurrentVelocity() const;
 
 private:
 	float sphereRadius;
 
 	UPROPERTY()
-		FVector currentDirection;
+		FVector currentVelocity;
 	UPROPERTY()
 		TSet<ABoidPawn*> nearbyBoids = TSet<ABoidPawn*>();
 	UPROPERTY()
@@ -61,4 +72,39 @@ private:
 	 * @return direction with no obstacle.
 	 */
 	FVector GetObstacleAvoidDirection() const;
+
+	/**
+	 * Get directions away from each nearby boid and average them.
+	 *
+	 * Return zero vector if no nearby boids.
+	 *
+	 * @return separation direction
+	 */
+	FVector GetSeparationDirection() const;
+
+	/*
+	 * Get direction to center of mass of all nearby boids.
+	 *
+	 * Return zero vector if no nearby boids.
+	 *
+	 * @return direction to center of mass.
+	 */
+	FVector GetCohesionDirection() const;
+
+	/*
+	 * Get average direction of all nearby boids.
+	 *
+	 * Return zero vector if no nearby boids.
+	 *
+	 * @return average direction.
+	 */
+	FVector GetAlignmentDirection() const;
+	
+	/**
+	 * Convert direction to force.
+	 *
+	 * @param direction Heading direction to convert.
+	 * @return force converted from direction.
+	 */
+	FVector GetForce(FVector direction) const;
 };

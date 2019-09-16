@@ -13,7 +13,7 @@ void ABoidPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	currentDirection = GetActorForwardVector();
+	currentVelocity = GetActorForwardVector();
 	if (USphereComponent * sphereComponent = Cast<USphereComponent>(GetComponentByClass(USphereComponent::StaticClass())))
 	{
 		sphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ABoidPawn::BeginOverlap);
@@ -26,14 +26,24 @@ void ABoidPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	currentDirection = GetObstacleAvoidDirection();
-	SetActorLocation(GetActorLocation() + currentDirection * TopSpeed);
-	SetActorRotation(currentDirection.Rotation());
+	const FVector obstacleAvoidForce = GetForce(GetObstacleAvoidDirection()) * CollisionAvoidanceWeight;
+	const FVector separationForce = GetForce(GetSeparationDirection()) * SeparationWeight;
+	const FVector cohesionForce = GetForce(GetCohesionDirection()) * CohesionWeight;
+	const FVector alignmentForce = GetForce(GetAlignmentDirection()) * AlignmentWeight;
+
+	currentVelocity += (obstacleAvoidForce + separationForce + cohesionForce + alignmentForce) * DeltaTime;
+	const float speed = FMath::Clamp(currentVelocity.Size(), MinSpeed, MaxSpeed);
+	const FVector direction = currentVelocity.GetSafeNormal();
+	currentVelocity = direction * speed;
+	
+
+	SetActorLocation(GetActorLocation() + currentVelocity);
+	SetActorRotation(currentVelocity.Rotation());
 }
 
-FVector ABoidPawn::GetCurrentDirection() const
+FVector ABoidPawn::GetCurrentVelocity() const
 {
-	return currentDirection;
+	return currentVelocity;
 }
 
 void ABoidPawn::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -62,7 +72,7 @@ void ABoidPawn::EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 
 FVector ABoidPawn::GetObstacleAvoidDirection() const
 {
-	for (FVector point: linetracePoints)
+	for (FVector point : linetracePoints)
 	{
 		FVector worldPoint = GetTransform().TransformPosition(point * sphereRadius);
 		FHitResult hitResult;
@@ -74,4 +84,47 @@ FVector ABoidPawn::GetObstacleAvoidDirection() const
 		}
 	}
 	return GetActorForwardVector();
+}
+
+FVector ABoidPawn::GetSeparationDirection() const
+{
+	if (nearbyBoids.Num() == 0) return FVector::ZeroVector;
+	
+	FVector separationDirection = FVector::ZeroVector;
+	for (ABoidPawn* boid : nearbyBoids)
+	{
+		separationDirection += GetActorLocation() - boid->GetActorLocation();
+	}
+	return separationDirection / nearbyBoids.Num();
+}
+
+FVector ABoidPawn::GetCohesionDirection() const
+{
+	if (nearbyBoids.Num() == 0) return FVector::ZeroVector;
+
+	FVector centerOfMass = FVector::ZeroVector;
+	for (ABoidPawn* boid : nearbyBoids)
+	{
+		centerOfMass += boid->GetActorLocation();
+	}
+	centerOfMass /= nearbyBoids.Num();
+	return centerOfMass - GetActorLocation();
+}
+
+FVector ABoidPawn::GetAlignmentDirection() const
+{
+	if (nearbyBoids.Num() == 0) return FVector::ZeroVector;
+	
+	FVector alignmentDirection = FVector::ZeroVector;
+	for (ABoidPawn* boid : nearbyBoids)
+	{
+		alignmentDirection += boid->GetCurrentVelocity();
+	}
+	return alignmentDirection / nearbyBoids.Num();
+}
+
+FVector ABoidPawn::GetForce(FVector direction) const
+{
+	const FVector force = direction.GetSafeNormal() * MaxSpeed - currentVelocity;
+	return force;
 }
