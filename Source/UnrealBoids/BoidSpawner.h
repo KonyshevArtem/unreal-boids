@@ -88,6 +88,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid spawner properties")
 		TSubclassOf<class ABoidPawn> BoidBlueprintType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid spawner properties")
+		AActor* BoidTarget;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid spawner properties")
 		int TotalBoids;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid spawner properties", meta = (ClipMin = "100"))
@@ -101,7 +103,7 @@ private:
 	UPROPERTY()
 		FSpawnerBounds bounds;
 
-	/// Create boid inside spawner area.
+	/// Create boid inside spawner area and add target to it.
 	void SpawnBoid() const;
 
 	/**

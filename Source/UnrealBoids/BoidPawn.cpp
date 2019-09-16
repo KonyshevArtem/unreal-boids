@@ -26,12 +26,19 @@ void ABoidPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	FVector targetDirection = FVector::ZeroVector;
+	if (target)
+	{
+		targetDirection = target->GetActorLocation() - GetActorLocation();
+	}
+	const FVector targetForce = GetForce(targetDirection);
+	
 	const FVector obstacleAvoidForce = GetForce(GetObstacleAvoidDirection()) * CollisionAvoidanceWeight;
 	const FVector separationForce = GetForce(GetSeparationDirection()) * SeparationWeight;
 	const FVector cohesionForce = GetForce(GetCohesionDirection()) * CohesionWeight;
 	const FVector alignmentForce = GetForce(GetAlignmentDirection()) * AlignmentWeight;
 
-	currentVelocity += (obstacleAvoidForce + separationForce + cohesionForce + alignmentForce) * DeltaTime;
+	currentVelocity += (obstacleAvoidForce + separationForce + cohesionForce + alignmentForce + targetForce) * DeltaTime;
 	const float speed = FMath::Clamp(currentVelocity.Size(), MinSpeed, MaxSpeed);
 	const FVector direction = currentVelocity.GetSafeNormal();
 	currentVelocity = direction * speed;
@@ -44,6 +51,11 @@ void ABoidPawn::Tick(float DeltaTime)
 FVector ABoidPawn::GetCurrentVelocity() const
 {
 	return currentVelocity;
+}
+
+void ABoidPawn::SetTarget(AActor* target)
+{
+	this->target = target;
 }
 
 void ABoidPawn::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

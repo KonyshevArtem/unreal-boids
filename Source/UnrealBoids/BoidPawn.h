@@ -45,6 +45,13 @@ public:
 	 */
 	FVector GetCurrentVelocity() const;
 
+	/*
+	 * Set target for boid to go to.
+	 *
+	 * @param target Target to go to.
+	 */
+	void SetTarget(AActor* target);
+
 private:
 	float sphereRadius;
 
@@ -54,6 +61,8 @@ private:
 		TSet<ABoidPawn*> nearbyBoids = TSet<ABoidPawn*>();
 	UPROPERTY()
 		TArray<FVector> linetracePoints = BoidUtils::GetPointsOnUnitSphere(LinecastPointsAmount);
+	UPROPERTY()
+		AActor* target;
 
 	UFUNCTION()
 		void BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,

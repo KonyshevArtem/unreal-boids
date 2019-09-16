@@ -49,7 +49,8 @@ void ABoidSpawner::SpawnBoid() const
 		FMath::RandRange(-BoidAreaWidth / 2 + 100, BoidAreaWidth / 2 - 100),
 		FMath::RandRange(-BoidAreaHeight / 2 + 100, BoidAreaHeight / 2 - 100));
 	const FVector direction = FMath::VRand();
-	GetWorld()->SpawnActor<ABoidPawn>(BoidBlueprintType.Get(), GetActorLocation() + locationOffset, direction.Rotation(), parameters);
+	ABoidPawn* pawn = GetWorld()->SpawnActor<ABoidPawn>(BoidBlueprintType.Get(), GetActorLocation() + locationOffset, direction.Rotation(), parameters);
+	pawn->SetTarget(BoidTarget);
 }
 
 FSpawnerBounds ABoidSpawner::GetSpawnerBounds() const
