@@ -26,13 +26,7 @@ void ABoidPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FVector targetDirection = FVector::ZeroVector;
-	if (target)
-	{
-		targetDirection = target->GetActorLocation() - GetActorLocation();
-	}
-	const FVector targetForce = GetForce(targetDirection);
-	
+	const FVector targetForce = GetForce(GetTargetDirection()) * TargetWeight;
 	const FVector obstacleAvoidForce = GetForce(GetObstacleAvoidDirection()) * CollisionAvoidanceWeight;
 	const FVector separationForce = GetForce(GetSeparationDirection()) * SeparationWeight;
 	const FVector cohesionForce = GetForce(GetCohesionDirection()) * CohesionWeight;
@@ -42,7 +36,7 @@ void ABoidPawn::Tick(float DeltaTime)
 	const float speed = FMath::Clamp(currentVelocity.Size(), MinSpeed, MaxSpeed);
 	const FVector direction = currentVelocity.GetSafeNormal();
 	currentVelocity = direction * speed;
-	
+
 
 	SetActorLocation(GetActorLocation() + currentVelocity);
 	SetActorRotation(currentVelocity.Rotation());
@@ -101,7 +95,7 @@ FVector ABoidPawn::GetObstacleAvoidDirection() const
 FVector ABoidPawn::GetSeparationDirection() const
 {
 	if (nearbyBoids.Num() == 0) return FVector::ZeroVector;
-	
+
 	FVector separationDirection = FVector::ZeroVector;
 	for (ABoidPawn* boid : nearbyBoids)
 	{
@@ -126,13 +120,19 @@ FVector ABoidPawn::GetCohesionDirection() const
 FVector ABoidPawn::GetAlignmentDirection() const
 {
 	if (nearbyBoids.Num() == 0) return FVector::ZeroVector;
-	
+
 	FVector alignmentDirection = FVector::ZeroVector;
 	for (ABoidPawn* boid : nearbyBoids)
 	{
 		alignmentDirection += boid->GetCurrentVelocity();
 	}
 	return alignmentDirection / nearbyBoids.Num();
+}
+
+FVector ABoidPawn::GetTargetDirection() const
+{
+	if (!target) return FVector::ZeroVector;
+	return (target->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 }
 
 FVector ABoidPawn::GetForce(FVector direction) const

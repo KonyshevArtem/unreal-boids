@@ -37,6 +37,8 @@ public:
 		float AlignmentWeight = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid properties")
 		float CollisionAvoidanceWeight = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid properties")
+		float TargetWeight = 1;
 
 	/**
 	 * Return current velocity of boid.
@@ -108,6 +110,15 @@ private:
 	 * @return average direction.
 	 */
 	FVector GetAlignmentDirection() const;
+
+	/*
+	 * Get direction to target.
+	 *
+	 * Return zero vector if no target.
+	 *
+	 * @return direction to target.
+	 */
+	FVector GetTargetDirection() const;
 	
 	/**
 	 * Convert direction to force.
