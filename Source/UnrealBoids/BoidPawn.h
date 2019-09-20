@@ -6,7 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "BoidSpawner.h"
 #include "Components/SphereComponent.h"
-#include "BoidUtils.h"
+#include "GameFramework/Character.h"
 #include "BoidPawn.generated.h"
 
 UCLASS()
@@ -19,15 +19,12 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid properties")
 		float MinSpeed = 5;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid properties")
 		float MaxSpeed = 10;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid properties")
-		int LinecastPointsAmount = 300;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid properties")
 		float CohesionWeight = 1;
@@ -54,6 +51,27 @@ public:
 	 */
 	void SetTarget(AActor* target);
 
+	/**
+	 * Return boid's current target.
+	 *
+	 * @return reference to target actor.
+	 */
+	AActor* GetTarget() const;
+
+	/*
+	 * Return radius of sphere that is used for detecting other boids.
+	 *
+	 * @return radius of sphere.
+	 */
+	float GetSphereRadius() const;
+
+	/*
+	 * Return set of boids that currently overlap with detection sphere of this boid.
+	 *
+	 * @return set of nearby boids.
+	 */
+	TSet<ABoidPawn*> GetNearbyBoids() const;
+
 private:
 	float sphereRadius;
 
@@ -61,8 +79,6 @@ private:
 		FVector currentVelocity;
 	UPROPERTY()
 		TSet<ABoidPawn*> nearbyBoids = TSet<ABoidPawn*>();
-	UPROPERTY()
-		TArray<FVector> linetracePoints = BoidUtils::GetPointsOnUnitSphere(LinecastPointsAmount);
 	UPROPERTY()
 		AActor* target;
 
@@ -73,58 +89,4 @@ private:
 	UFUNCTION()
 		void EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex);
-
-	/**
-	 * Return direction closest to current forward direction and which has no obstacle.
-	 *
-	 * Linetrace from actor to each point in linetracePoints and return direction to first with no hit.
-	 * Order of points in linetracePoints guaranties that found direction will be closest to current forward direction.
-	 *
-	 * @return direction with no obstacle.
-	 */
-	FVector GetObstacleAvoidDirection() const;
-
-	/**
-	 * Get directions away from each nearby boid and average them.
-	 *
-	 * Return zero vector if no nearby boids.
-	 *
-	 * @return separation direction
-	 */
-	FVector GetSeparationDirection() const;
-
-	/*
-	 * Get direction to center of mass of all nearby boids.
-	 *
-	 * Return zero vector if no nearby boids.
-	 *
-	 * @return direction to center of mass.
-	 */
-	FVector GetCohesionDirection() const;
-
-	/*
-	 * Get average direction of all nearby boids.
-	 *
-	 * Return zero vector if no nearby boids.
-	 *
-	 * @return average direction.
-	 */
-	FVector GetAlignmentDirection() const;
-
-	/*
-	 * Get direction to target.
-	 *
-	 * Return zero vector if no target.
-	 *
-	 * @return direction to target.
-	 */
-	FVector GetTargetDirection() const;
-	
-	/**
-	 * Convert direction to force.
-	 *
-	 * @param direction Heading direction to convert.
-	 * @return force converted from direction.
-	 */
-	FVector GetForce(FVector direction) const;
 };
