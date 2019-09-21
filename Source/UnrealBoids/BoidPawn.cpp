@@ -14,18 +14,12 @@ void ABoidPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	currentVelocity = GetActorForwardVector();
 	if (USphereComponent * sphereComponent = Cast<USphereComponent>(GetComponentByClass(USphereComponent::StaticClass())))
 	{
 		sphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ABoidPawn::BeginOverlap);
 		sphereComponent->OnComponentEndOverlap.AddDynamic(this, &ABoidPawn::EndOverlap);
 		sphereRadius = sphereComponent->GetScaledSphereRadius();
 	}
-}
-
-FVector ABoidPawn::GetCurrentVelocity() const
-{
-	return currentVelocity;
 }
 
 void ABoidPawn::SetTarget(AActor* target)

@@ -24,7 +24,7 @@ void UBoidService::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* No
 	const FVector cohesionForce = GetForce(ownerBoid, GetCohesionDirection(ownerBoid)) * ownerBoid->CohesionWeight;
 	const FVector alignmentForce = GetForce(ownerBoid, GetAlignmentDirection(ownerBoid)) * ownerBoid->AlignmentWeight;
 
-	FVector currentVelocity = ownerBoid->GetCurrentVelocity();
+	FVector currentVelocity = ownerBoid->GetActorForwardVector();
 	currentVelocity += (obstacleAvoidForce + separationForce + cohesionForce + alignmentForce + targetForce) * GetWorld()->GetDeltaSeconds();
 	const float speed = FMath::Clamp(currentVelocity.Size(), ownerBoid->MinSpeed, ownerBoid->MaxSpeed);
 	const FVector direction = currentVelocity.GetSafeNormal();
@@ -84,7 +84,7 @@ FVector UBoidService::GetAlignmentDirection(ABoidPawn* ownerBoid)
 	FVector alignmentDirection = FVector::ZeroVector;
 	for (ABoidPawn* boid : nearbyBoids)
 	{
-		alignmentDirection += boid->GetCurrentVelocity();
+		alignmentDirection += boid->GetActorForwardVector();
 	}
 	return alignmentDirection / nearbyBoids.Num();
 }
@@ -98,6 +98,6 @@ FVector UBoidService::GetTargetDirection(ABoidPawn* ownerBoid)
 
 FVector UBoidService::GetForce(ABoidPawn* ownerBoid, FVector direction)
 {
-	const FVector force = direction.GetSafeNormal() * ownerBoid->MaxSpeed - ownerBoid->GetCurrentVelocity();
+	const FVector force = direction.GetSafeNormal() * ownerBoid->MaxSpeed - ownerBoid->GetActorForwardVector();
 	return force;
 }

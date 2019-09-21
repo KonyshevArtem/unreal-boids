@@ -37,13 +37,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid properties")
 		float TargetWeight = 1;
 
-	/**
-	 * Return current velocity of boid.
-	 *
-	 * @return current velocity.
-	 */
-	FVector GetCurrentVelocity() const;
-
 	/*
 	 * Set target for boid to go to.
 	 *
@@ -75,8 +68,6 @@ public:
 private:
 	float sphereRadius;
 
-	UPROPERTY()
-		FVector currentVelocity;
 	UPROPERTY()
 		TSet<ABoidPawn*> nearbyBoids = TSet<ABoidPawn*>();
 	UPROPERTY()
