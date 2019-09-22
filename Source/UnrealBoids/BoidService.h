@@ -31,54 +31,61 @@ private:
 		TArray<FVector> linetracePoints = BoidUtils::GetPointsOnUnitSphere(300);
 
 	/**
-	 * Return direction closest to current forward direction and which has no obstacle.
+	 * Return direction closest to current forward direction of ownerBoid and which has no obstacle.
 	 *
 	 * Linetrace from actor to each point in linetracePoints and return direction to first with no hit.
 	 * Order of points in linetracePoints guaranties that found direction will be closest to current forward direction.
 	 *
+	 * @param ownerBoid Boid from location of which lines are cast.
 	 * @return direction with no obstacle.
 	 */
 	FVector GetObstacleAvoidDirection(ABoidPawn* ownerBoid) const;
 
 	/**
-	 * Get directions away from each nearby boid and average them.
+	 * Get negative directions from each nearby boid to ownerBoid and average them.
 	 *
 	 * Return zero vector if no nearby boids.
 	 *
+	 * @param ownerBoid Boid to get nearby boids from.
 	 * @return separation direction
 	 */
 	static FVector GetSeparationDirection(ABoidPawn* ownerBoid);
 
-	/*
-	 * Get direction to center of mass of all nearby boids.
+	/**
+	 * Get direction from ownerBoid to center of mass of all nearby boids of ownerBoid.
 	 *
 	 * Return zero vector if no nearby boids.
 	 *
+	 * @param ownerBoid Boid to get nearby boids from.
 	 * @return direction to center of mass.
 	 */
 	static FVector GetCohesionDirection(ABoidPawn* ownerBoid);
 
-	/*
-	 * Get average direction of all nearby boids.
+	/**
+	 * Get average velocity of all nearby boids of ownerBoid.
 	 *
 	 * Return zero vector if no nearby boids.
 	 *
+	 * @param ownerBoid Boid to get nearby boids from.
 	 * @return average direction.
 	 */
 	static FVector GetAlignmentDirection(ABoidPawn* ownerBoid);
 
-	/*
-	 * Get direction to target.
+	/**
+	 * Get direction from boid to target.
 	 *
 	 * Return zero vector if no target.
 	 *
+	 * @param ownerBoid Boid from which direction is calculated.
+	 * @param target Actor to which direction is calculated.
 	 * @return direction to target.
 	 */
-	static FVector GetTargetDirection(ABoidPawn* ownerBoid);
+	static FVector GetTargetDirection(ABoidPawn* ownerBoid, AActor* target);
 
 	/**
-	 * Convert direction to force.
+	 * Convert direction to force relative to boid.
 	 *
+	 * @param ownerBoid Boid relative to which direction is converted.
 	 * @param direction Heading direction to convert.
 	 * @return force converted from direction.
 	 */

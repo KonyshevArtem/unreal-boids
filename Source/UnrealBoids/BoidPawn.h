@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "BoidSpawner.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Character.h"
 #include "BoidPawn.generated.h"
@@ -42,14 +41,7 @@ public:
 	 *
 	 * @param target Target to go to.
 	 */
-	void SetTarget(AActor* target);
-
-	/**
-	 * Return boid's current target.
-	 *
-	 * @return reference to target actor.
-	 */
-	AActor* GetTarget() const;
+	void SetTarget(AActor* target) const;
 
 	/*
 	 * Return radius of sphere that is used for detecting other boids.
@@ -70,8 +62,6 @@ private:
 
 	UPROPERTY()
 		TSet<ABoidPawn*> nearbyBoids = TSet<ABoidPawn*>();
-	UPROPERTY()
-		AActor* target;
 
 	UFUNCTION()
 		void BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,

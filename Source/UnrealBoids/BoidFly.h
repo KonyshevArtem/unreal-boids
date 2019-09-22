@@ -17,6 +17,15 @@ class UNREALBOIDS_API UBoidFly : public UBTTaskNode
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
+private:
+	/**
+	 * Set boid rotation to face targetLocation and move boid to targetLocation.
+	 *
+	 * @param boid Pawn to move and rotate.
+	 * @param targetLocation Location to which rotate and move boid.
+	 */
+	static void MoveBoid(APawn* boid, FVector targetLocation);
+	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FBlackboardKeySelector BlackboardKey;

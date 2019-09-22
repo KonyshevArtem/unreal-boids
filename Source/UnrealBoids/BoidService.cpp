@@ -18,7 +18,8 @@ void UBoidService::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* No
 	ABoidPawn* ownerBoid = Cast<ABoidPawn>(OwnerComp.GetAIOwner()->GetPawn());
 	if (!ownerBoid) return;
 
-	const FVector targetForce = GetForce(ownerBoid, GetTargetDirection(ownerBoid)) * ownerBoid->TargetWeight;
+	AActor* target = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("Target"));
+	const FVector targetForce = GetForce(ownerBoid, GetTargetDirection(ownerBoid, target)) * ownerBoid->TargetWeight;
 	const FVector obstacleAvoidForce = GetForce(ownerBoid, GetObstacleAvoidDirection(ownerBoid)) * ownerBoid->CollisionAvoidanceWeight;
 	const FVector separationForce = GetForce(ownerBoid, GetSeparationDirection(ownerBoid)) * ownerBoid->SeparationWeight;
 	const FVector cohesionForce = GetForce(ownerBoid, GetCohesionDirection(ownerBoid)) * ownerBoid->CohesionWeight;
@@ -89,9 +90,8 @@ FVector UBoidService::GetAlignmentDirection(ABoidPawn* ownerBoid)
 	return alignmentDirection / nearbyBoids.Num();
 }
 
-FVector UBoidService::GetTargetDirection(ABoidPawn* ownerBoid)
+FVector UBoidService::GetTargetDirection(ABoidPawn* ownerBoid, AActor* target)
 {
-	AActor* target = ownerBoid->GetTarget();
 	if (!target) return FVector::ZeroVector;
 	return (target->GetActorLocation() - ownerBoid->GetActorLocation()).GetSafeNormal();
 }

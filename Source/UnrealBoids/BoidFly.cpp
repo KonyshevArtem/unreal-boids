@@ -9,11 +9,15 @@ EBTNodeResult::Type UBoidFly::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uin
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	APawn* pawn = OwnerComp.GetAIOwner()->GetPawn();
+	APawn* boid = OwnerComp.GetAIOwner()->GetPawn();
 	const FVector targetLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(BlackboardKey.SelectedKeyName);
-	const FRotator targetDirection = (targetLocation - pawn->GetActorLocation()).Rotation();
-	pawn->SetActorLocation(targetLocation);
-	pawn->SetActorRotation(targetDirection);
-	
+	MoveBoid(boid, targetLocation);
 	return EBTNodeResult::Succeeded;
+}
+
+void UBoidFly::MoveBoid(APawn* boid, FVector targetLocation)
+{
+	const FRotator targetDirection = (targetLocation - boid->GetActorLocation()).Rotation();
+	boid->SetActorLocation(targetLocation);
+	boid->SetActorRotation(targetDirection);
 }

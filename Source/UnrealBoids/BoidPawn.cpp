@@ -3,7 +3,8 @@
 
 #include "BoidPawn.h"
 #include "Engine/Engine.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "AIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 ABoidPawn::ABoidPawn()
 {
@@ -22,14 +23,9 @@ void ABoidPawn::BeginPlay()
 	}
 }
 
-void ABoidPawn::SetTarget(AActor* target)
+void ABoidPawn::SetTarget(AActor* target) const
 {
-	this->target = target;
-}
-
-AActor* ABoidPawn::GetTarget() const
-{
-	return target;
+	GetController<AAIController>()->GetBlackboardComponent()->SetValueAsObject("Target", target);
 }
 
 float ABoidPawn::GetSphereRadius() const
